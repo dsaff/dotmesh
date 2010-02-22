@@ -1,0 +1,15 @@
+<project name="dotmesh" default="jar" basedir=".">
+	<target name="jar">
+		<mkdir dir="target"/>
+		<javac srcdir="src" destdir="target" debug="on">
+			<classpath>
+				<pathelement location="lib/cglib-nodep-2.2.jar"/>
+				<pathelement location="lib/jmock-legacy-2.6.0-RC1.jar"/>
+				<pathelement location="lib/jmock-2.6.0-RC1.jar"/>
+				<pathelement location="lib/objenesis-1.0.jar"/>
+				<pathelement location="lib/junit-4.8.1.jar"/>
+			</classpath>
+		</javac>
+		<jar destfile="dotmesh-0.2.jar" basedir="target" />
+	</target>
+</project>
