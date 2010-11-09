@@ -6,6 +6,8 @@ package org.dotmesh;
 import java.lang.reflect.Modifier;
 
 public class DotmeshType {
+	static final int SYNTHETIC = 0x00001000;
+	
 	Class<?> type;
 
 	public DotmeshType(Class<?> type) {
@@ -17,7 +19,7 @@ public class DotmeshType {
 	}
 
 	boolean isSynthetic() {
-		return (type.getModifiers() & Dotmesh.SYNTHETIC) != 0;
+		return (type.getModifiers() & SYNTHETIC) != 0;
 	}
 
 	boolean isPrivate() {

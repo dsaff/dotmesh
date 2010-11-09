@@ -3,6 +3,8 @@ package org.dotmesh;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.sf.cglib.core.CodeGenerationException;
@@ -96,7 +98,7 @@ public class ClassImposteriser implements Imposteriser {
 				: possibleMockedType;
 
 		Enhancer enhancer = new Enhancer() {
-			@SuppressWarnings({"unchecked" })
+			@SuppressWarnings("rawtypes")
 			@Override
 			protected void filterConstructors(Class sc, List constructors) {
 				// Don't filter
@@ -153,9 +155,11 @@ public class ClassImposteriser implements Imposteriser {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T imposterizeIdeally(Invokable inv, Class<T> idealType) {
+	public <T> T imposterizeIdeally(Invokable inv, Class<T> idealType, Class<?>... additionalInterfaces) {
 		Class<?> targetClass = new DotmeshType(idealType).targetClass();
-		return (T) imposterise(inv, targetClass, idealType.getInterfaces());
+		ArrayList<Class<?>> interfaces = new ArrayList<Class<?>>(Arrays.asList(additionalInterfaces));
+		interfaces.addAll(Arrays.asList(idealType.getInterfaces()));
+		return (T) imposterise(inv, targetClass, interfaces.toArray(new Class<?>[0]));
 	}
 
 	public static class ClassWithSuperclassToWorkAroundCglibBug {

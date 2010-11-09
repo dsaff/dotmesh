@@ -1,42 +1,57 @@
 package test.org.dotmesh;
 
-import static org.dotmesh.Dotmesh.assertThat;
-import static org.dotmesh.Dotmesh.integer;
-import static org.dotmesh.Dotmesh.not;
-import static org.dotmesh.Dotmesh.string;
+import static org.dotmesh.Dotmesh.affirm;
+import static org.dotmesh.Dotmesh.assume;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
 import org.junit.Test;
+import org.junit.internal.AssumptionViolatedException;
 
 public class DotmeshTest {
 	@Test
-	public void assertContains() {
-		assertThat(Arrays.asList("a", "b", "c")).contains("a");
+	public void affirmContains() {
+		affirm.that(Arrays.asList("a", "b", "c")).contains("a");
 	}
 
 	@Test
-	public void assertMatches() {
-		assertThat("abc").matches(".*a.*");
+	public void affirmMatches() {
+		affirm.that("abc").matches(".*a.*");
 	}
 
 	@Test
-	public void assertNotIsEmpty() {
-		assertThat(not(Arrays.asList("a", "b", "c"))).isEmpty();
+	public void affirmNotIsEmpty() {
+		affirm.not().that(Arrays.asList("a", "b", "c")).isEmpty();
 	}
 
 	@Test
-	public void notToString() {
-		assertThat(string(not(Arrays.asList("a", "b", "c")).toString()))
-				.equals("not([a, b, c])");
+	public void affirmNotString() {
+		affirm.not().that("abc").contains("d");
 	}
 
 	@Test
-	public void assertDoesntContain() {
+	public void affirmNotClass() {
+		affirm.not().that(String.class).isInstance(1);
+	}
+
+	@Test
+	public void affirmNotToString() {
 		try {
-			assertThat(Arrays.asList("a", "b", "c")).contains("d");
+			affirm.not().that(Arrays.asList("a", "b", "c")).contains("a");
+		} catch (AssertionError expected) {
+			affirm.that(expected.getMessage()).equals(
+					"Failed: not <[a, b, c]>.contains(<a>)");
+			return;
+		}
+		fail("Should have thrown");
+	}
+
+	@Test
+	public void affirmDoesntContain() {
+		try {
+			affirm.that(Arrays.asList("a", "b", "c")).contains("d");
 		} catch (AssertionError expected) {
 			return;
 		}
@@ -44,20 +59,20 @@ public class DotmeshTest {
 	}
 
 	@Test
-	public void assertOnSet() {
-		assertThat(new HashSet<String>(Arrays.asList("a", "b", "c"))).contains(
-				"c");
+	public void affirmOnSet() {
+		HashSet<String> set = new HashSet<String>(Arrays.asList("a", "b", "c"));
+		affirm.that(set).contains("c");
 	}
 
 	@Test
-	public void assertThatOnString() {
-		assertThat("abc").contains("c");
+	public void affirmThatOnString() {
+		affirm.that("abc").contains("c");
 	}
 
 	@Test
-	public void assertThatOnStringFails() {
+	public void affirmThatOnStringFails() {
 		try {
-			assertThat("abc").contains("d");
+			affirm.that("abc").contains("d");
 		} catch (AssertionError expected) {
 			return;
 		}
@@ -65,52 +80,84 @@ public class DotmeshTest {
 	}
 
 	@Test
-	public void detailedErrorMessage() {
+	public void detailedAffirmErrorMessage() {
 		try {
-			assertThat("abc").contains("defgh");
+			affirm.that("abc").contains("defgh");
 		} catch (AssertionError expected) {
-			assertThat(expected.getMessage()).equals(
-					"Failed: <abc>.contains(<defgh>)");
+			String message = expected.getMessage();
+			affirm.that(message).equals("Failed: <abc>.contains(<defgh>)");
 			return;
 		}
 		fail("Should have thrown AssertionError");
 	}
 
 	@Test
-	public void detailedErrorMessageIsEmpty() {
+	public void detailedAffirmErrorMessageIsEmpty() {
 		try {
-			assertThat(Arrays.asList("a")).isEmpty();
+			affirm.that(Arrays.asList("a")).isEmpty();
 		} catch (AssertionError expected) {
-			assertThat(expected.getMessage()).equals("Failed: <[a]>.isEmpty()");
+			String message = expected.getMessage();
+			affirm.that(message).equals("Failed: <[a]>.isEmpty()");
 			return;
 		}
 		fail("Should have thrown AssertionError");
 	}
 
 	@Test
-	public void detailedErrorMessageMultipleParams() {
+	public void detailedAffirmErrorMessageMultipleParams() {
 		try {
-			assertThat("abcde").startsWith("ghi", 1);
+			affirm.that("abcde").startsWith("ghi", 1);
 		} catch (AssertionError expected) {
-			assertThat(expected.getMessage()).equals(
-					"Failed: <abcde>.startsWith(<ghi>,<1>)");
+			String m = expected.getMessage();
+			affirm.that(m).equals("Failed: <abcde>.startsWith(<ghi>,<1>)");
 			return;
 		}
 		fail("Should have thrown AssertionError");
 	}
 
 	@Test
-	public void intNotEquals() {
-		assertThat(1).notEquals(2);
+	public void detailedAssumeErrorMessageMultipleParams() {
+		try {
+			assume.that("abcde").startsWith("ghi", 1);
+		} catch (AssumptionViolatedException expected) {
+			String m = expected.getMessage();
+			assume.that(m).equals("Failed: <abcde>.startsWith(<ghi>,<1>)");
+			return;
+		}
+		fail("Should have thrown");
 	}
 
 	@Test
-	public void realIntAsserterNotEquals() {
-		assertThat(integer(2).notEquals(2)).equals(false);
+	public void assumeNot() {
+		try {
+			assume.not().that("abcde").startsWith("abc");
+		} catch (AssumptionViolatedException expected) {
+			String m = expected.getMessage();
+			assume.that(m).equals("Failed: <abcde>.startsWith(<ghi>,<1>)");
+			return;
+		}
+		fail("Should have thrown");
 	}
 
 	@Test
-	public void notOnInteger() {
-		assertThat(not(1)).equals(2);
+	public void affirmIntNotEquals() {
+		affirm.that(1).notEquals(2);
+	}
+
+	@Test
+	public void detailedAffirmErrorMessageInts() {
+		try {
+			affirm.that(1).notEquals(1);
+		} catch (AssertionError expected) {
+			String m = expected.getMessage();
+			affirm.that(m).equals("Failed: <1>.notEquals(<1>)");
+			return;
+		}
+		fail("Should have thrown AssertionError");
+	}
+
+	@Test
+	public void affirmNotOnInteger() {
+		affirm.not().that(1).equals(2);
 	}
 }
